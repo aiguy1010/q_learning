@@ -82,6 +82,17 @@ def rnd_pick_best(options):
 
 
 if __name__ == '__main__':
+    # Test rnd_pick_best
+    for t in range(100):
+        i = random.choice(range(4))
+        opts = [-2.5]*4
+        opts[i] = 0
+        pick = rnd_pick_best(opts)
+        print('opts={}, i={}, pick={}'.format(opts, i, pick))
+        if pick != i:
+            print('What now!?')
+
+
     for t in range(100):
         run(1000, train=True)
         state = (0,0)
