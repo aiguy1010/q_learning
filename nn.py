@@ -38,9 +38,9 @@ class NeuralNetwork:
         # There is one more entry in z_cache than in layers. This will allow us
         # to take a pair of z_cache values (neuron levels before activation applied)
         # for each set of weights we want to update. (e.i. one for the units above
-        # the weights and one for the units below)
+        # the connections/weights and one for the units below)
         error_above = errors
-        for l in list(range(len(self.layers)))[::-1]:
+        for l in range(len(self.layers)-1, 0, -1):
             z_below, z_above = self.z_cache[l:l+2]
 
             # If z_below is the network input, don't apply an activation function
@@ -96,13 +96,16 @@ if __name__ == '__main__':
     data = zip(words, shifted_words)
     data = list(data)
 
-    nn = NeuralNetwork(layer_info=[(4, 'sig'),
-                                   (4, 'sig'),
+    nn = NeuralNetwork(layer_info=[(5, 'sig'),
+                                   (5, 'sig'),
                                    (3, 'sig')],
                        input_size=3)
 
     # Train for 10000 epochs (complete iterations through the data)
-    for epoch in range(10000):
+    start_log_rate = -1
+    end_log_rate = -1
+    epochs_to_train = 100000
+    for epoch in range(epochs_to_train):
         epoch_samples = random.sample(data, len(data))
         for s, (X, Y_) in enumerate(epoch_samples):
             Y = nn.infer(X)
@@ -110,14 +113,15 @@ if __name__ == '__main__':
             e = Y - Y_
 
             # Compute L2 loss derivatives for back prop
-            if s==0 and epoch % 10 == 0:
+            if s==0 and epoch % 10000 == 0:
                 loss = sum(0.5*(Y_ - Y)**2)
                 print('=========Epoch: {}========='.format(epoch))
                 print('loss={}'.format(loss))
                 print('{}->{} : {}'.format(X, Y, Y_))
                 print('error={}\n'.format(e))
 
-
-            nn.backprop(e, 0.1)
+            a = epoch/epochs_to_train
+            log_training_rate = start_log_rate*(1-a) + end_log_rate*a
+            nn.backprop(e, 10**log_training_rate)
 
     Y = nn.infer(X)
