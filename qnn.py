@@ -110,7 +110,7 @@ def draw_world(display_surf, tile_size):
                 color_to_draw = wall_color
             pygame.draw.rect(display_surf, color_to_draw, tile_rect)
 
-def run_training(nn, steps, learning_rate, view_margin):
+def run_world(nn, steps, view_margin, learning_rate=None, display=True, misstep_prop=.0):
     # Initialize the board
     init_board(food_prob=0.1, spikes_prob=0.05)
 
@@ -119,7 +119,26 @@ def run_training(nn, steps, learning_rate, view_margin):
         visable_window = read_input_window(view_margin)
         flat_window = visable_window.reshape(shape=[1, -1])
 
-        # TODO: Have the nn make a move "a", calculate an updated value for Q(s,a), backprop to target
+        # Get an input to feed the learner
+        view_window = read_input_window(view_margin)
+
+        # Run inference with nn to get a Q value for each action in this state
+        action_qvals = nn.infer(view_window.reshape(shape=[1, -1]))
+        best_action = action_qvals.index(max(action_qvals))
+
+        # Do misstep?
+        if random.random() < misstep:
+            possible_actions = [0, 1, 2, 3]
+            take_action = random.choice( possible_actions[:best_action] + possible_actions[best_action+1:] )
+        else:
+            take_action = best_action
+
+        # Do the move/action
+        do_move(take_action)
+
+        if learning_rate is not None:
+            nn.push
+
 
 
 if __name__ == '__main__':
@@ -129,15 +148,31 @@ if __name__ == '__main__':
     pygame.init()
     display_surf = pygame.display.set_mode(screen_size)
 
+    # Initialize the Neural Network
+    view_margin = 2
+    nn = NeuralNetwork(layer_info=[(50, 'sig'),
+                                   (50, 'sig'),
+                                   (16, 'sig'),
+                                   (4, 'none')],
+                       input_size=2*view_margin+1)
+
+    # Do some training
+    run_world(nn, 1000, learning_rate=0.1, display=False, misstep_prop=0.5)
+    run_world(nn, 10000, learning_rate=0.1, display=False, misstep_prop=0.1)
+
     # Initialize the board
     init_board(food_prob=0.1, spikes_prob=0.05)
-
-    # Initialize the Neural Network
 
     while True:
         # Handle events
         for event in pygame.event.get():
             if event.type == pygame.QUIT: sys.exit()
+
+        # Get an input to feed the learning
+        view_window =
+
+        # Run inference with nn to get a Q value for each action in this state
+        action_qvals = nn.infer(view_window.reshape(shape=[1, -1]))
 
         # Draw everything
         draw_world(display_surf, tile_size)

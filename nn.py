@@ -22,6 +22,19 @@ class NeuralNetwork:
             'sig': lambda x:1/(1+np.exp(-x)),
             'sig_prime': lambda x:np.exp(-x)/(1+np.exp(-x))**2,
         }
+        self.z_cache_stash = []
+
+
+    def pushfront_z_cache(self):
+        cache_copy = np.array()
+        for layer_zs in self.z_cache:
+            cache_copy.append( np.array(layer_zs) )
+        self.z_cache_stash.insert(0, cache_copy)
+
+
+    def popback_z_cache(self):
+        item = self.z_cache_stash.pop()
+
 
     def infer(self, X):
         self.z_cache = [X]
@@ -33,6 +46,7 @@ class NeuralNetwork:
             prev_outs = activation_fn(self.z_cache[-1])
 
         return prev_outs[0]
+
 
     def backprop(self, errors, learning_rate):
         # There is one more entry in z_cache than in layers. This will allow us
