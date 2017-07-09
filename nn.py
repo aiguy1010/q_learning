@@ -33,7 +33,7 @@ class NeuralNetwork:
 
 
     def popback_z_cache(self):
-        item = self.z_cache_stash.pop()
+        self.z_cache = self.z_cache_stash.pop()
 
 
     def infer(self, X):
