@@ -8,7 +8,6 @@ class NeuralNetwork:
         # Initialize weights and biases (weights are associated with the units above them)
         self.layers = []
         last_units = input_size
-        print(layer_info)
         for units, activation_str in self.layer_info:
             W = np.random.normal(size=[last_units, units])
             b = np.random.normal(size=[1, units])
@@ -26,7 +25,7 @@ class NeuralNetwork:
 
 
     def pushfront_z_cache(self):
-        cache_copy = np.array()
+        cache_copy = []
         for layer_zs in self.z_cache:
             cache_copy.append( np.array(layer_zs) )
         self.z_cache_stash.insert(0, cache_copy)
@@ -58,7 +57,7 @@ class NeuralNetwork:
             z_below, z_above = self.z_cache[l:l+2]
 
             # If z_below is the network input, don't apply an activation function
-            if l==0:
+            if l==1:
                 activation_fn_str = 'identity'
             else:
                 activation_fn_str = self.layers[l-1][2]
